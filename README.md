@@ -1,6 +1,6 @@
 # fdn-client-fb — Freedom Net client for FreeBASIC + libvt
 
-A native, GUI-windowed [Freedom Net](https://github.com/ronen-blumberg/Freedom.Net/blob/main/README.txt) client written in
+A native, GUI-windowed [Freedom Net](https://github.com/ronen-blumberg/Freedom.Net) client written in
 FreeBASIC on top of [libvt](https://github.com/rbreitinger/libvt).
 Wire-compatible with the reference `client.c` / `client.py` and either
 `server.c` / `server.py`: any combination of clients and servers can
@@ -170,7 +170,7 @@ update check, no account.
 ## Wire compatibility
 
 This client speaks the exact byte-for-byte protocol described in
-[`MANIFESTO.txt`](https://github.com/ronen-blumberg/Freedom.Net/blob/main/README.txt) §8:
+[`MANIFESTO.txt`](https://github.com/ronen-blumberg/Freedom.Net) §8:
 
 ```
 [4 byte big-endian length N]  [16 byte IV]  [N - 16 bytes ciphertext]
@@ -230,6 +230,6 @@ rendering inside messages.
 
 `fdn-client-fb.bas` is a Freedom Net client — same project, same
 spirit, same protocol as everything else in this directory. See
-[`MANIFESTO.txt`](https://github.com/ronen-blumberg/Freedom.Net/blob/main/README.txt) for the philosophy, the protocol, and
-the limits, and [`libvt/README.md`](https://github.com/rbreitinger/libvt/README.md) for the
+[`MANIFESTO.txt`](https://github.com/ronen-blumberg/Freedom.Net) for the philosophy, the protocol, and
+the limits, and [`libvt/README.md`](https://github.com/rbreitinger/libvt) for the
 UI library this client is built on.
