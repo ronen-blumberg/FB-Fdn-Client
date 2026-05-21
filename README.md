@@ -1,13 +1,13 @@
-# fdn-client-fb — Freedom Net client for FreeBASIC + libvt
+# khn-client-fb — kolhaam-network client for FreeBASIC + libvt
 
-A native, GUI-windowed [Freedom Net](https://github.com/ronen-blumberg/Freedom.Net) client written in
+A native, GUI-windowed [kolhaam-network](https://github.com/ronen-blumberg/kolhaam-network) client written in
 FreeBASIC on top of [libvt](https://github.com/rbreitinger/libvt).
 Wire-compatible with the reference `client.c` / `client.py` and either
 `server.c` / `server.py`: any combination of clients and servers can
 interoperate.
 
-Source: [`fdn-client-fb.bas`](fdn-client-fb.bas).
-Binary (after build): `./fdn-client-fb`.
+Source: [`khn-client-fb.bas`](khn-client-fb.bas).
+Binary (after build): `./khn-client-fb`.
 
 ---
 
@@ -26,26 +26,26 @@ Standard library only otherwise — no extra FB libraries to install.
 ## Building
 
 ```sh
-fbc fdn-client-fb.bas
+fbc khn-client-fb.bas
 ```
 
 The `#cmdline` directive at the top of the source already sets
 `-s gui -w all -gen gcc -O 2`, so a plain `fbc` is enough. Output is a
-single executable, `fdn-client-fb`, in the current directory.
+single executable, `khn-client-fb`, in the current directory.
 
 ---
 
 ## Running
 
 ```
-fdn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]
+khn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]
 ```
 
 | Argument     | Meaning                                                    |
 |--------------|------------------------------------------------------------|
 | `--big`/`-b` | Use the 16×24 font (default is 8×16). Place anywhere.      |
 | `--small`/`-s` | Force the 8×16 font (this is the default).               |
-| `<server>`   | Host name or IP of the Freedom Net server.                 |
+| `<server>`   | Host name or IP of the kolhaam-network server.                 |
 | `<port>`     | TCP port (1..65535).                                       |
 | `<keyphrase>`| Shared secret used to derive the AES-256 key. Required.    |
 | `<nickname>` | Optional. `""` (empty) → server picks a random nick.       |
@@ -55,18 +55,18 @@ Examples:
 
 ```sh
 # Local server, you supply everything
-./fdn-client-fb 127.0.0.1 6667 'midnight-in-the-garden' alice main
+./khn-client-fb 127.0.0.1 6667 'midnight-in-the-garden' alice main
 
 # Public server, anonymous (server picks nick + room)
-./fdn-client-fb freedomnet.tech 5190 'midnight-in-the-garden' "" ""
+./khn-client-fb kolhaam-network.tech 5190 'midnight-in-the-garden' "" ""
 
 # Same, with the larger font for a Hi-DPI display
-./fdn-client-fb --big freedomnet.tech 5190 'midnight-in-the-garden' alice main
+./khn-client-fb --big kolhaam-network.tech 5190 'midnight-in-the-garden' alice main
 ```
 
 A short pause on connect is normal — the keyphrase goes through 100 000
 SHA-256 iterations to derive the AES-256 session key, as defined by the
-Freedom Net protocol.
+kolhaam-network protocol.
 
 ---
 
@@ -74,9 +74,9 @@ Freedom Net protocol.
 
 ```
 +----------------------------------------------------------------+
-| Freedom Net 0.1.2  -  alice  @  main                           |  ← title bar
+| kolhaam-network 0.1.2  -  alice  @  main                           |  ← title bar
 |----------------------------------------------------------------|
-| [12:34] Freedom Net 0.1.2 - FreeBASIC client                   |
+| [12:34] kolhaam-network 0.1.2 - FreeBASIC client                   |
 | [12:34] Connected as "alice" in room "main".                   |  ← chat history
 | [12:34] [main] users (2): alice, bob                           |    (scrollable)
 | [12:35] [main] bob: hey alice                                  |
@@ -146,7 +146,7 @@ Nickname and room rules (enforced both client- and server-side):
 - no whitespace, no `:` or `,`
 
 Rooms beginning with `+` are **secret rooms** (not shown by `/list`,
-never auto-assigned). See [`MANIFESTO.txt`](MANIFESTO.txt) §3.13.
+never auto-assigned). See [`MANIFESTO.txt`](https://github.com/ronen-blumberg/kolhaam-network) §3.13.
 
 ---
 
@@ -154,7 +154,7 @@ never auto-assigned). See [`MANIFESTO.txt`](MANIFESTO.txt) §3.13.
 
 In the current working directory:
 
-- `freedom-net-<nick>.log` — a plain-text transcript of everything you
+- `kolhaam-net-<nick>.log` — a plain-text transcript of everything you
   see (timestamped). Re-opened with a new name whenever you `/nick`.
   Append mode, so multiple sessions accumulate.
 - Received files (`/send` from someone) are saved under their original
@@ -170,14 +170,14 @@ update check, no account.
 ## Wire compatibility
 
 This client speaks the exact byte-for-byte protocol described in
-[`MANIFESTO.txt`](https://github.com/ronen-blumberg/Freedom.Net) §8:
+[`MANIFESTO.txt`](https://github.com/ronen-blumberg/kolhaam-network) §8:
 
 ```
 [4 byte big-endian length N]  [16 byte IV]  [N - 16 bytes ciphertext]
 plaintext = [1 byte type] [payload]
 ```
 
-- **KDF:** `SHA-256(passphrase ‖ "FreedomNet-v1")` then 100 000 rounds of
+- **KDF:** `SHA-256(passphrase ‖ "KolHaAmNet-v1")` then 100 000 rounds of
   `SHA-256(buf ‖ passphrase)`.
 - **Cipher:** AES-256-CBC, PKCS#7 padded, fresh random 16-byte IV per
   frame, drawn from `/dev/urandom`.
@@ -185,7 +185,7 @@ plaintext = [1 byte type] [payload]
   P Q` — same set the C and Python clients use.
 
 All crypto (SHA-256, AES, KDF, framing) is implemented inside
-`fdn-client-fb.bas` itself — no OpenSSL, no mbedTLS, no other
+`khn-client-fb.bas` itself — no OpenSSL, no mbedTLS, no other
 dependency.
 
 ---
@@ -228,8 +228,8 @@ rendering inside messages.
 
 ## License / project context
 
-`fdn-client-fb.bas` is a Freedom Net client — same project, same
+`khn-client-fb.bas` is a kolhaam-network client — same project, same
 spirit, same protocol as everything else in this directory. See
-[`MANIFESTO.txt`](https://github.com/ronen-blumberg/Freedom.Net) for the philosophy, the protocol, and
-the limits, and [`libvt/README.md`](https://github.com/rbreitinger/libvt) for the
+[`MANIFESTO.txt`](https://github.com/ronen-blumberg/kolhaam-network) for the philosophy, the protocol, and
+the limits, and [`libvt/README.md`](https://github.com/rbreitinger/libvt/README.md) for the
 UI library this client is built on.

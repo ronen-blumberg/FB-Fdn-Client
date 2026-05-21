@@ -1,18 +1,18 @@
 ' =============================================================================
-' fdn-client-fb.bas -- Freedom Net client, FreeBASIC + libvt
+' khn-client-fb.bas -- kolhaam-network client, FreeBASIC + libvt
 '
 ' Wire-compatible with client.c / client.py / server.c / server.py from
-' the Freedom Net project (see MANIFESTO.txt). Same KDF, same AES-256-CBC,
+' the kolhaam-network project (see MANIFESTO.txt). Same KDF, same AES-256-CBC,
 ' same packet layouts -- any combination of clients/servers interoperate.
 '
 ' Usage:
-'   fdn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]
+'   khn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]
 '
 ' Pass "" for nickname or room to let the server pick one randomly.
 ' --big (or -b) uses the 16x24 font; default is 8x16.
 '
 ' Build (Linux, libvt installed in FB's include path):
-'   fbc -s gui -w all -gen gcc -O 2 fdn-client-fb.bas
+'   fbc -s gui -w all -gen gcc -O 2 khn-client-fb.bas
 '
 ' Commands at the prompt:
 '   /join <room>             join a room (or switch to it)
@@ -40,9 +40,9 @@
 ' -----------------------------------------------------------------------------
 ' Protocol constants -- must match server.c / client.c
 ' -----------------------------------------------------------------------------
-Const APP_NAME           = "Freedom Net"
+Const APP_NAME           = "kolhaam-network"
 Const APP_VERSION        = "0.1.2"
-Const KDF_TAG            = "FreedomNet-v1"
+Const KDF_TAG            = "KolHaAmNet-v1"
 Const KDF_ITER           = 100000
 
 Const MAX_NICK           = 32
@@ -679,7 +679,7 @@ End Sub
 Sub log_open(nk As String)
     log_close()
     Dim safe As String = sanitize_nick(nk)
-    Dim fn   As String = "freedom-net-" & safe & ".log"
+    Dim fn   As String = "kolhaam-net-" & safe & ".log"
     g_log = FreeFile
     If Open(fn For Append As #g_log) <> 0 Then
         g_log = 0
@@ -1640,7 +1640,7 @@ Dim want_room  As String
 ' shown in the vt window after vt_screen is up.
 Dim usage_err As String
 If narg < 4 OrElse narg > 6 Then
-    usage_err = "Usage:  fdn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]" & Chr(10) & _
+    usage_err = "Usage:  khn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]" & Chr(10) & _
                 Chr(10) & _
                 "Pass """" for nickname or room to let the server pick one." & Chr(10) & _
                 "--big (or -b) uses the 16x24 font; default is 8x16."
