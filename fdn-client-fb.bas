@@ -470,9 +470,10 @@ End Function
 ' seeded from clock/pid in the unlikely event the OS source fails.
 ' -----------------------------------------------------------------------------
 #ifdef __FB_WIN32__
+    ' GetCurrentProcessId is already declared by windows.bi, which libvt's
+    ' winsock2.bi pulls in transitively -- do NOT redeclare it here.
     Extern "Windows"
-        Declare Function GetCurrentProcessId Lib "kernel32" Alias "GetCurrentProcessId" () As ULong
-        Declare Function RtlGenRandom        Lib "advapi32" Alias "SystemFunction036" ( _
+        Declare Function RtlGenRandom Lib "advapi32" Alias "SystemFunction036" ( _
             ByVal RandomBuffer As Any Ptr, _
             ByVal RandomBufferLength As ULong) As Byte
     End Extern
@@ -1634,31 +1635,58 @@ Dim passphrase As String
 Dim want_nick  As String
 Dim want_room  As String
 
+' Decide whether the args look ok. Don't print anything yet -- under -s gui
+' on Windows there is no stdout to print to, so any usage message has to be
+' shown in the vt window after vt_screen is up.
+Dim usage_err As String
 If narg < 4 OrElse narg > 6 Then
-    Print "Usage: fdn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]"
-    Print ""
-    Print "Pass """" for nickname or room to let the server pick one."
-    Print "--big (or -b) uses the 16x24 font; default is 8x16."
-    End 2
-End If
-
-host       = args(1)
-port       = ValInt(args(2))
-passphrase = args(3)
-If narg >= 5 Then want_nick = args(4)
-If narg >= 6 Then want_room = args(5)
-
-If port <= 0 OrElse port > 65535 Then
-    Print "Port out of range." : End 2
-End If
-If Len(passphrase) = 0 Then
-    Print "Keyphrase cannot be empty." : End 2
+    usage_err = "Usage:  fdn-client-fb [--big] <server> <port> <keyphrase> [<nickname>] [<room>]" & Chr(10) & _
+                Chr(10) & _
+                "Pass """" for nickname or room to let the server pick one." & Chr(10) & _
+                "--big (or -b) uses the 16x24 font; default is 8x16."
+Else
+    host       = args(1)
+    port       = ValInt(args(2))
+    passphrase = args(3)
+    If narg >= 5 Then want_nick = args(4)
+    If narg >= 6 Then want_room = args(5)
+    If port <= 0 OrElse port > 65535 Then
+        usage_err = "Port out of range (must be 1..65535)."
+    ElseIf Len(passphrase) = 0 Then
+        usage_err = "Keyphrase cannot be empty."
+    End If
 End If
 
 vt_title(APP_NAME & " " & APP_VERSION & " (FreeBASIC)")
 Dim fnt_w As Long = IIf(big_font, 16, 8)
 Dim fnt_h As Long = IIf(big_font, 24, 16)
 If vt_screen(VT_SCREENPARAM(g_cols, g_rows, fnt_w, fnt_h), VT_WINDOWED) <> 0 Then End 1
+
+' Bad command line: show the usage in the window and wait for a keypress
+' before exiting. (Print to stdout doesn't reach the user under -s gui.)
+If Len(usage_err) > 0 Then
+    vt_cls(VT_BLACK)
+    vt_color(VT_YELLOW, VT_BLACK)
+    vt_locate(2, 2)
+    Dim ue_lines() As String
+    Dim ue_n       As Long = vt_str_split(usage_err, Chr(10), ue_lines())
+    Dim ue_i       As Long
+    For ue_i = 0 To ue_n - 1
+        vt_locate(2 + ue_i, 2)
+        vt_print(ue_lines(ue_i))
+    Next ue_i
+    vt_color(VT_LIGHT_GREY, VT_BLACK)
+    vt_locate(vt_rows() - 1, 2)
+    vt_print("Press any key to exit.")
+    vt_present()
+    Do
+        Dim ue_k As ULong = vt_inkey()
+        If ue_k <> 0 Then Exit Do
+        vt_sleep(50)
+    Loop
+    vt_shutdown()
+    End 2
+End If
 g_cols = vt_cols()
 g_rows = vt_rows()
 screen_relayout()
