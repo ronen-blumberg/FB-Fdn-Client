@@ -465,9 +465,24 @@ End Function
 
 ' -----------------------------------------------------------------------------
 ' Random bytes -- IV must be unpredictable to keep CBC secure.
-' /dev/urandom on Linux; fall back to a chained hash of clock+pid+timer state.
+' Linux: /dev/urandom.  Windows: RtlGenRandom (SystemFunction036 in advapi32,
+' same source the C reference client uses). Both fall back to a SHA-256 chain
+' seeded from clock/pid in the unlikely event the OS source fails.
 ' -----------------------------------------------------------------------------
+#ifdef __FB_WIN32__
+    Extern "Windows"
+        Declare Function GetCurrentProcessId Lib "kernel32" Alias "GetCurrentProcessId" () As ULong
+        Declare Function RtlGenRandom        Lib "advapi32" Alias "SystemFunction036" ( _
+            ByVal RandomBuffer As Any Ptr, _
+            ByVal RandomBufferLength As ULong) As Byte
+    End Extern
+    #Inclib "advapi32"
+#endif
+
 Sub rand_bytes(buf As UByte Ptr, n As Long)
+#ifdef __FB_WIN32__
+    If RtlGenRandom(buf, CULng(n)) <> 0 Then Exit Sub
+#else
     Dim f As FILE Ptr
     f = fopen("/dev/urandom", "rb")
     If f <> 0 Then
@@ -477,11 +492,17 @@ Sub rand_bytes(buf As UByte Ptr, n As Long)
         End If
         fclose(f)
     End If
+#endif
     ' Fallback: chain SHA-256 of timer/pid into the buffer.
     Static state(0 To 31) As UByte
     Static seeded         As Byte = 0
     If seeded = 0 Then
-        Dim seed As String = Str(Timer) & ":" & Str(getpid()) & ":" & _
+        #ifdef __FB_WIN32__
+            Dim pid As ULong = GetCurrentProcessId()
+        #else
+            Dim pid As ULong = getpid()
+        #endif
+        Dim seed As String = Str(Timer) & ":" & Str(pid) & ":" & _
                               Str(Time) & ":" & Str(Date)
         Dim c    As sha256_ctx
         sha256_init(c)
